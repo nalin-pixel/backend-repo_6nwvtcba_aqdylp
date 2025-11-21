@@ -8,13 +8,14 @@ Each Pydantic model represents a collection in your database.
 Model name is converted to lowercase for the collection name:
 - User -> "user" collection
 - Product -> "product" collection
-- BlogPost -> "blogs" collection
+- BlogPost -> "blogpost" collection
+- ContactMessage -> "contactmessage" collection
 """
 
-from pydantic import BaseModel, Field
-from typing import Optional
+from pydantic import BaseModel, Field, EmailStr
+from typing import Optional, List
 
-# Example schemas (replace with your own):
+# Example schemas (you can extend with your own):
 
 class User(BaseModel):
     """
@@ -22,7 +23,7 @@ class User(BaseModel):
     Collection name: "user" (lowercase of class name)
     """
     name: str = Field(..., description="Full name")
-    email: str = Field(..., description="Email address")
+    email: EmailStr = Field(..., description="Email address")
     address: str = Field(..., description="Address")
     age: Optional[int] = Field(None, ge=0, le=120, description="Age in years")
     is_active: bool = Field(True, description="Whether user is active")
@@ -38,11 +39,25 @@ class Product(BaseModel):
     category: str = Field(..., description="Product category")
     in_stock: bool = Field(True, description="Whether product is in stock")
 
-# Add your own schemas here:
-# --------------------------------------------------
+class BlogPost(BaseModel):
+    """
+    Blog posts collection schema
+    Collection name: "blogpost"
+    """
+    title: str = Field(..., description="Post title")
+    excerpt: Optional[str] = Field(None, description="Short summary")
+    content: str = Field(..., description="Full content in markdown or HTML")
+    author: str = Field(..., description="Author name")
+    tags: List[str] = Field(default_factory=list, description="Post tags")
+    cover_image: Optional[str] = Field(None, description="URL to cover image")
+    featured: bool = Field(False, description="Featured flag")
 
-# Note: The Flames database viewer will automatically:
-# 1. Read these schemas from GET /schema endpoint
-# 2. Use them for document validation when creating/editing
-# 3. Handle all database operations (CRUD) directly
-# 4. You don't need to create any database endpoints!
+class ContactMessage(BaseModel):
+    """
+    Contact messages collection schema
+    Collection name: "contactmessage"
+    """
+    name: str = Field(..., description="Sender name")
+    email: EmailStr = Field(..., description="Sender email")
+    subject: str = Field(..., description="Message subject")
+    message: str = Field(..., min_length=10, description="Message body")
